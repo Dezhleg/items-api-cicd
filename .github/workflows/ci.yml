@@ -1,0 +1,39 @@
+name: Java Spring Boot CI
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/*'
+      - 'bugfix/*'
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
+
+jobs:
+  build-n-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Build and run unit tests
+        run: mvn clean test package
+
+  docker-pack-n-push:
+    needs: build-n-test
+    uses: ./.github/workflows/docker-reusable.yml
+    with:
+      repository: 'dezhleg2795/items-api'
+      tag: 'latest'
+      branch: ${{ github.ref }}
+    secrets:
+      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
