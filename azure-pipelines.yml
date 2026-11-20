@@ -6,7 +6,7 @@ pool:
 
 variables:
   dockerHubServiceConnection: 'dockerhub-connection'
-  imageRepository: 'dezhleg/items-api'
+  imageRepository: 'dezhleg2795/items-api'
   dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
   tag: 'latest'
 
