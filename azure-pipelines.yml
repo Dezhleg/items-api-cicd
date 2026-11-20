@@ -17,15 +17,14 @@ stages:
       - job: MavenBuildTest
         displayName: 'Maven Build & Test'
         steps:
-          - task: Maven@4
+          - script: mvn clean test package
             displayName: 'Build project and run unit tests'
+          - task: PublishTestResults@2
+            displayName: 'Publish JUnit test results'
+            condition: succeededOrFailed()
             inputs:
-              mavenPomFile: 'pom.xml'
-              goals: 'clean test package'
-              publishJUnitResults: true
+              testResultsFormat: 'JUnit'
               testResultsFiles: '**/surefire-reports/TEST-*.xml'
-              javaHomeOption: 'JDKVersion'
-              jdkVersionOption: '1.17'
 
   - stage: DockerBuildAndPush
     displayName: 'Build, Tag and Push Docker Image'
