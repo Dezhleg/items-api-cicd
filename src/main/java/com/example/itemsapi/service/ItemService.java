@@ -1,51 +1,49 @@
 package com.example.itemsapi.service;
 
 import com.example.itemsapi.model.Item;
+import com.example.itemsapi.repository.ItemRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class ItemService {
 
-    private final Map<Long, Item> storage = new ConcurrentHashMap<>();
-    private final AtomicLong idGenerator = new AtomicLong(1);
+    private final ItemRepository itemRepository;
 
-    public ItemService() {
-        create(new Item(null, "Keyboard", "Mechanical keyboard", 85.0));
-        create(new Item(null, "Mouse", "Wireless gaming mouse", 45.5));
+    public ItemService(ItemRepository itemRepository) {
+        this.itemRepository = itemRepository;
     }
 
     public List<Item> getAll() {
-        return new ArrayList<>(storage.values());
+        return itemRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
     }
 
     public Optional<Item> getById(Long id) {
-        return Optional.ofNullable(storage.get(id));
+        return itemRepository.findById(id);
     }
 
     public Item create(Item item) {
-        long id = idGenerator.getAndIncrement();
-        item.setId(id);
-        storage.put(id, item);
-        return item;
+        item.setId(null);
+        return itemRepository.save(item);
     }
 
     public Optional<Item> update(Long id, Item updated) {
-        if (!storage.containsKey(id)) {
-            return Optional.empty();
-        }
-        updated.setId(id);
-        storage.put(id, updated);
-        return Optional.of(updated);
+        return itemRepository.findById(id).map(existing -> {
+            existing.setName(updated.getName());
+            existing.setDescription(updated.getDescription());
+            existing.setPrice(updated.getPrice());
+            return itemRepository.save(existing);
+        });
     }
 
     public boolean delete(Long id) {
-        return storage.remove(id) != null;
+        if (!itemRepository.existsById(id)) {
+            return false;
+        }
+        itemRepository.deleteById(id);
+        return true;
     }
 }

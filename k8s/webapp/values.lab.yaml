@@ -1,0 +1,19 @@
+backend:
+  replicaCount: 1
+  image:
+    pullPolicy: Always
+
+frontend:
+  replicaCount: 1
+  image:
+    pullPolicy: Always
+
+migration:
+  enabled: true
+  image:
+    pullPolicy: Always
+
+ingress:
+  enabled: true
+  className: nginx
+  host: webapp.lab.test

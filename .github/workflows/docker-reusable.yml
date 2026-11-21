@@ -12,6 +12,21 @@ on:
         required: false
         type: string
         default: 'latest'
+      context:
+        description: 'Docker build context'
+        required: false
+        type: string
+        default: '.'
+      dockerfile:
+        description: 'Path to Dockerfile'
+        required: false
+        type: string
+        default: 'Dockerfile'
+      artifact_name:
+        description: 'Artifact name for non-main branches'
+        required: false
+        type: string
+        default: 'docker-image'
       branch:
         description: 'Target branch name to decide push or artifact upload'
         required: true
@@ -35,7 +50,8 @@ jobs:
       - name: Build Docker image
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ${{ inputs.context }}
+          file: ${{ inputs.dockerfile }}
           push: false
           load: true
           tags: ${{ inputs.repository }}:${{ inputs.tag }}
@@ -51,7 +67,8 @@ jobs:
         if: inputs.branch == 'refs/heads/main'
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ${{ inputs.context }}
+          file: ${{ inputs.dockerfile }}
           push: true
           tags: ${{ inputs.repository }}:${{ inputs.tag }}
 
@@ -63,6 +80,6 @@ jobs:
         if: inputs.branch != 'refs/heads/main'
         uses: actions/upload-artifact@v4
         with:
-          name: docker-image-${{ inputs.tag }}
+          name: ${{ inputs.artifact_name }}
           path: image.tar
           retention-days: 5

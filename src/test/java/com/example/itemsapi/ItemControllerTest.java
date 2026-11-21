@@ -1,7 +1,9 @@
 package com.example.itemsapi;
 
 import com.example.itemsapi.model.Item;
+import com.example.itemsapi.repository.ItemRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -24,6 +26,16 @@ class ItemControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private ItemRepository itemRepository;
+
+    @BeforeEach
+    void setUp() {
+        itemRepository.deleteAll();
+        itemRepository.save(new Item(null, "Keyboard", "Mechanical keyboard", 85.0));
+        itemRepository.save(new Item(null, "Mouse", "Wireless gaming mouse", 45.5));
+    }
+
     @Test
     void shouldGetAllItems() throws Exception {
         mockMvc.perform(get("/api/items"))
@@ -34,7 +46,8 @@ class ItemControllerTest {
 
     @Test
     void shouldGetItemById() throws Exception {
-        mockMvc.perform(get("/api/items/1"))
+        Long id = itemRepository.findAll().get(0).getId();
+        mockMvc.perform(get("/api/items/" + id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Keyboard"));
     }
@@ -53,15 +66,16 @@ class ItemControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(3))
+                .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.name").value("Headset"));
     }
 
     @Test
     void shouldUpdateItem() throws Exception {
+        Long id = itemRepository.findAll().get(1).getId();
         Item updated = new Item(null, "Pro Mouse", "Updated model", 59.0);
 
-        mockMvc.perform(put("/api/items/2")
+        mockMvc.perform(put("/api/items/" + id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updated)))
                 .andExpect(status().isOk())
@@ -70,10 +84,11 @@ class ItemControllerTest {
 
     @Test
     void shouldDeleteItem() throws Exception {
-        mockMvc.perform(delete("/api/items/1"))
+        Long id = itemRepository.findAll().get(0).getId();
+        mockMvc.perform(delete("/api/items/" + id))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/api/items/1"))
+        mockMvc.perform(get("/api/items/" + id))
                 .andExpect(status().isNotFound());
     }
 }

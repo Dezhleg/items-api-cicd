@@ -1,9 +1,21 @@
 package com.example.itemsapi.model;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "items")
 public class Item {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private String name;
+
     private String description;
+
+    @Column(nullable = false)
     private double price;
 
     public Item() {

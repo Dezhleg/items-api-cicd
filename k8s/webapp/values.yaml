@@ -1,0 +1,52 @@
+global:
+  namespace: webapp-lab
+
+postgres:
+  name: lab-postgres
+  image:
+    repository: postgres
+    tag: "16-alpine"
+    pullPolicy: IfNotPresent
+  port: 5432
+  database: itemsdb
+  username: itemsuser
+  password: itemspass
+
+migration:
+  name: lab-migration
+  enabled: true
+  image:
+    repository: dezhleg2795/items-migrator
+    tag: latest
+    pullPolicy: Always
+  backoffLimit: 4
+
+backend:
+  name: lab-api
+  replicaCount: 1
+  image:
+    repository: dezhleg2795/items-api
+    tag: latest
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 8080
+  datasource:
+    url: jdbc:postgresql://lab-postgres:5432/itemsdb
+
+frontend:
+  name: lab-frontend
+  replicaCount: 1
+  image:
+    repository: dezhleg2795/items-frontend
+    tag: latest
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 80
+
+ingress:
+  enabled: true
+  name: lab-webapp
+  className: nginx
+  host: webapp.lab.test
