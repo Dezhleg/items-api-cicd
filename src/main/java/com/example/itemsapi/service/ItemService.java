@@ -2,13 +2,14 @@ package com.example.itemsapi.service;
 
 import com.example.itemsapi.model.Item;
 import com.example.itemsapi.repository.ItemRepository;
-import org.springframework.data.domain.Sort;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Profile("!migrate")
 public class ItemService {
 
     private final ItemRepository itemRepository;
@@ -17,15 +18,15 @@ public class ItemService {
         this.itemRepository = itemRepository;
     }
 
-    public List<Item> getAll() {
-        return itemRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
+    public List<Item> findAll() {
+        return itemRepository.findAll();
     }
 
-    public Optional<Item> getById(Long id) {
+    public Optional<Item> findById(Long id) {
         return itemRepository.findById(id);
     }
 
-    public Item create(Item item) {
+    public Item save(Item item) {
         item.setId(null);
         return itemRepository.save(item);
     }
@@ -40,10 +41,10 @@ public class ItemService {
     }
 
     public boolean delete(Long id) {
-        if (!itemRepository.existsById(id)) {
-            return false;
+        if (itemRepository.existsById(id)) {
+            itemRepository.deleteById(id);
+            return true;
         }
-        itemRepository.deleteById(id);
-        return true;
+        return false;
     }
 }
