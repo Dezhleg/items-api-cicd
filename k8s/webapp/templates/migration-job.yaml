@@ -25,6 +25,8 @@ spec:
           image: "{{ .Values.migration.image.repository }}:{{ .Values.migration.image.tag }}"
           imagePullPolicy: {{ .Values.migration.image.pullPolicy }}
           env:
+            - name: SPRING_FLYWAY_ENABLED
+              value: "true"
             - name: SPRING_DATASOURCE_URL
               value: {{ .Values.backend.datasource.url | quote }}
             - name: SPRING_DATASOURCE_USERNAME
