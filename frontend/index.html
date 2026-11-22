@@ -34,7 +34,7 @@
         <input type="number" id="price" step="0.01" min="0" placeholder="Ціна ($)" required>
         <div>
             <button type="submit" class="btn-primary" id="submitBtn">Додати</button>
-            <button type="button" class="btn-cancel" id="cancelBtn" onclick="resetForm()">Скасувати</button>
+            <button type="button" class="btn-cancel" id="cancelBtn">Скасувати</button>
         </div>
     </form>
 
@@ -73,16 +73,36 @@
         tbody.innerHTML = '';
         items.forEach(item => {
             const tr = document.createElement('tr');
-            tr.innerHTML = 
-                <td></td>
-                <td><strong></strong></td>
-                <td></td>
-                <td></td>
-                <td>
-                    <button class="btn-edit" onclick='startEdit()'>Ред.</button>
-                    <button class="btn-del" onclick="deleteItem()">Вид.</button>
-                </td>
-            ;
+
+            const tdId = document.createElement('td');
+            tdId.textContent = item.id;
+
+            const tdName = document.createElement('td');
+            const strong = document.createElement('strong');
+            strong.textContent = item.name;
+            tdName.appendChild(strong);
+
+            const tdDesc = document.createElement('td');
+            tdDesc.textContent = item.description || '';
+
+            const tdPrice = document.createElement('td');
+            tdPrice.textContent = Number(item.price).toFixed(2);
+
+            const tdActions = document.createElement('td');
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn-edit';
+            editBtn.textContent = 'Ред.';
+            editBtn.addEventListener('click', () => startEdit(item));
+
+            const delBtn = document.createElement('button');
+            delBtn.className = 'btn-del';
+            delBtn.textContent = 'Вид.';
+            delBtn.addEventListener('click', () => deleteItem(item.id));
+
+            tdActions.appendChild(editBtn);
+            tdActions.appendChild(delBtn);
+
+            tr.append(tdId, tdName, tdDesc, tdPrice, tdActions);
             tbody.appendChild(tr);
         });
     }
@@ -96,7 +116,7 @@
             price: parseFloat(document.getElementById('price').value)
         };
         const method = id ? 'PUT' : 'POST';
-        const url = id ? ${API_URL}/ : API_URL;
+        const url = id ? `${API_URL}/${id}` : API_URL;
 
         const res = await fetch(url, {
             method,
@@ -110,6 +130,8 @@
             alert('Помилка збереження: ' + res.status);
         }
     });
+
+    document.getElementById('cancelBtn').addEventListener('click', resetForm);
 
     function startEdit(item) {
         document.getElementById('itemId').value = item.id;
@@ -128,12 +150,8 @@
     }
 
     async function deleteItem(id) {
-        const res = await fetch(${API_URL}/, { method: 'DELETE' });
+        const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
         if (res.ok) await loadItems();
-    }
-
-    function escapeHtml(str) {
-        return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     }
 
     loadItems();
