@@ -2,26 +2,23 @@ package com.example.itemsapi;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
+@ComponentScan(
+    basePackages = "com.example.itemsapi",
+    excludeFilters = @ComponentScan.Filter(
+        type = FilterType.ASSIGNABLE_TYPE,
+        classes = MigratorApplication.class
+    )
+)
+@EnableJpaRepositories(basePackages = "com.example.itemsapi.repository")
+@EntityScan(basePackages = "com.example.itemsapi.model")
 public class ItemsApiApplication {
     public static void main(String[] args) {
-        SpringApplication app = new SpringApplication(ItemsApiApplication.class);
-        if (Arrays.asList(args).contains("--migrate")) {
-            Map<String, Object> props = new HashMap<>();
-            props.put("spring.profiles.active", "migrate");
-            props.put("spring.main.web-application-type", "none");
-            props.put("spring.autoconfigure.exclude",
-                    HibernateJpaAutoConfiguration.class.getName() + "," +
-                    JpaRepositoriesAutoConfiguration.class.getName());
-            app.setDefaultProperties(props);
-        }
-        app.run(args);
+        SpringApplication.run(ItemsApiApplication.class, args);
     }
 }
